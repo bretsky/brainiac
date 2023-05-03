@@ -6,7 +6,17 @@ const userColumns = [
   "user",
   "password",
   "email"
-]
+];
+
+const benchmarkColumns = [
+  "user",
+  "timestamp",
+  "op",
+  "l",
+  "r",
+  "elapsed",
+  "attempts"
+];
 
 class MockDB {
   constructor() {
@@ -45,6 +55,21 @@ class MockDB {
     });
     stringifier.pipe(writableStream);
     return this.users[userid];
+  }
+  createBenchmark(userid, timestamp, op, l, r, elapsed, attempts) {
+    if (!(userid in this.benchmarks)) {
+      this.benchmarks[userid] = [];
+    }
+    this.benchmarks[userid].push([userid, timestamp, op, l, r, elapsed, attempts]);
+    const writableStream = fs.createWriteStream("benchmarks.csv");
+    const stringifier = stringify({ header: true, columns: benchmarkColumns });
+    Object.entries(this.benchmarks).forEach(([key, value]) => {
+      value.forEach((row) => {
+        stringifier.write(row);
+      });
+    });
+    stringifier.pipe(writableStream);
+    return [userid, timestamp, op, l, r, elapsed, attempts];
   }
 }
 
