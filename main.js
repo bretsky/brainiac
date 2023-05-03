@@ -9,8 +9,8 @@ const cors = require('cors');
 app.use(cors({
     origin: process.env.FRONTEND_HOST
 }));
-const http = require('http');
-const server = http.createServer(app);
+const https = require('https');
+const server = https.createServer(app);
 const io = require("socket.io")(server, {
   cors: {
     origin: process.env.FRONTEND_HOST,
