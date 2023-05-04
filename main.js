@@ -9,24 +9,22 @@ const cors = require('cors');
 app.use(cors({
     origin: process.env.FRONTEND_HOST
 }));
-const https = require('https');
 
-const fs = require('fs');
-var privateKey = fs.readFileSync( '/etc/letsencrypt/live/api0.brettselby.xyz/privkey.pem' );
-var certificate = fs.readFileSync( '/etc/letsencrypt/live/api0.brettselby.xyz/cert.pem' );
 
-const server = https.createServer({
-    key: privateKey,
-    cert: certificate
-}, app);
-const io = require("socket.io")(server, {
-  cors: {
-    origin: process.env.FRONTEND_HOST,
-    methods: ["GET", "POST"]
-  }
-});
-const jwt = require('jsonwebtoken');
-const bcrypt = require("bcrypt");
+let server = null;
+if (process.env.NODE_ENV === 'production') {
+    const fs = require('fs');
+    var privateKey = fs.readFileSync( '/etc/letsencrypt/live/api0.brettselby.xyz/privkey.pem' );
+    var certificate = fs.readFileSync( '/etc/letsencrypt/live/api0.brettselby.xyz/cert.pem' );
+    const https = require('https');
+    server = https.createServer({
+        key: privateKey,
+        cert: certificate
+    }, app);
+} else {
+    const http = require('http');
+    server = http.createServer(app);
+}
 
 
 let db;
@@ -44,6 +42,15 @@ if (process.env.NODE_ENV === 'production' || process.env.USE_POSTGRES_DEV === 't
     const MockDB = require("./mockdb");
     db = new MockDB();
 }
+
+const io = require("socket.io")(server, {
+  cors: {
+    origin: process.env.FRONTEND_HOST,
+    methods: ["GET", "POST"]
+  }
+});
+const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt");
 
 
 const {randomChoice, randAdd, randSub, randMul, randDiv} = require('./quiz');
