@@ -10,7 +10,15 @@ app.use(cors({
     origin: process.env.FRONTEND_HOST
 }));
 const https = require('https');
-const server = https.createServer(app);
+
+const fs = require('fs');
+var privateKey = fs.readFileSync( '/etc/letsencrypt/live/api0.brettselby.xyz/privkey.pem' );
+var certificate = fs.readFileSync( '/etc/letsencrypt/live/api0.brettselby.xyz/cert.pem' );
+
+const server = https.createServer({
+    key: privateKey,
+    cert: certificate
+}, app);
 const io = require("socket.io")(server, {
   cors: {
     origin: process.env.FRONTEND_HOST,
