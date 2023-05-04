@@ -5,9 +5,16 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+const allowedOrigins = JSON.parse(process.env.FRONTEND_HOSTS);
 const cors = require('cors');
 app.use(cors({
-    origin: process.env.FRONTEND_HOST
+    origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
 }));
 
 
@@ -45,7 +52,7 @@ if (process.env.NODE_ENV === 'production' || process.env.USE_POSTGRES_DEV === 't
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: process.env.FRONTEND_HOST,
+    origin: allowedOrigins,
     methods: ["GET", "POST"]
   }
 });
