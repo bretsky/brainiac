@@ -67,7 +67,30 @@ const ops = {
     '-': randSub,
     '*': randMul,
     '/': randDiv,
-}
+};
+
+const defaultConfig = {
+    '+': {
+        active: true,
+        max: 100,
+        negative: true,
+    },
+    '-': {
+        active: true,
+        max: 100,
+        negative: true,
+    },
+    '*': {
+        active: true,
+        max: 30,
+        negative: true,
+    },
+    '/': {
+        active: true,
+        max: 30,
+        negative: true,
+    },
+};
 
 let hasAuth = {};
 let users = {};
@@ -126,7 +149,7 @@ app.post('/login', async (req, res) => {
             if (result) {
                 const token = jwt.sign({sub: userid}, process.env.SECRET_KEY, { expiresIn: '7d' });
                 // res.cookie('token', token, { httpOnly: true });
-                return res.status(200).json({ message: "User Logged in Successfully", userid: userid, token: token });
+                return res.status(200).json({ message: "User Logged in Successfully", userid: userid, token: token, config: defaultConfig });
             }
 
             console.log(err);
@@ -135,13 +158,11 @@ app.post('/login', async (req, res) => {
     } catch (err) {
         return res.status(401).json({message: err.message});
     }
-})
+});
 
 const nextQuestion = (socket, userid, config) => {
-    let activeOps = config.ops || Object.keys(ops);
-    let opsToDigits = config.digits || {'+': 3, '-': 3, '*': 2, '/': 2};
-    let op = randomChoice(activeOps);
-    let question = ops[op]({digits: opsToDigits[op]});
+    let op = randomChoice(Object.keys(config).filter(k => config[k].active));
+    let question = ops[op](config[op]);
     socket.emit('question', {question: question.str})
     return {sent: Date.now(), ping: null, attempts: 0, question: question};
 }
@@ -172,6 +193,8 @@ io.on('connection', (socket) => {
         } else {
             console.log(decoded)
             hasAuth[socket.id] = true;
+            configs[socket.id] = defaultConfig;
+
             socket.emit('auth', decoded);
         }
     });
@@ -209,6 +232,7 @@ io.on('connection', (socket) => {
         console.log(Number(answer))
         console.log('!=')
         console.log(users[userid].question.result)
+        socket.emit('incorrectAnswer', {response: answer});
     }
     console.log(users);
   });

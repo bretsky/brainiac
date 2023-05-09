@@ -14,11 +14,11 @@ const formatNegative = (n, parens=false) => {
 }
 
 const randAdd = (config) => {
-	let {digits} = config;
+	let {max, negative} = config;
 
-	let max = Math.pow(10, digits) - 1;
-	let l = randrange(-max, max);
-	let r = randrange(-max, max);
+	let min = negative ? -max : 0;
+	let l = randrange(min, max);
+	let r = randrange(min, max);
 	let str = `${formatNegative(l)} + ${formatNegative(r, true)} =`;
 	return {
 		str,
@@ -30,11 +30,11 @@ const randAdd = (config) => {
 }
 
 const randSub = (config) => {
-	let {digits} = config;
+	let {max, negative} = config;
 
-	let max = Math.pow(10, digits) - 1;
-	let l = randrange(-max, max);
-	let r = randrange(-max, max);
+	let min = negative ? -max : 0;
+	let l = randrange(min, max);
+	let r = randrange(min, max);
 	let str = `${formatNegative(l)} − ${formatNegative(r, true)} =`;
 	return {
 		str,
@@ -46,11 +46,11 @@ const randSub = (config) => {
 }
 
 const randMul = (config) => {
-	let {digits} = config;
+	let {max, negative} = config;
 
-	let max = Math.pow(10, digits) - 1;
-	let l = randrange(-max, max);
-	let r = randrange(-max, max);
+	let min = negative ? -max : 0;
+	let l = randrange(min, max);
+	let r = randrange(min, max);
 	let str = `${formatNegative(l)} × ${formatNegative(r)} =`;
 	return {
 		str,
@@ -62,13 +62,13 @@ const randMul = (config) => {
 }
 
 const randDiv = (config) => {
-	let {digits} = config;
+	let {max, negative} = config;
 
-	let max = Math.pow(10, digits) - 1;
-	let res = randrange(-max, max);
-	let r = randrange(-max, max);
+	let min = negative ? -max : 0;
+	let res = randrange(min, max);
+	let r = randrange(min, max);
 	while (r === 0) {
-		r = randrange(-max, max);
+		r = randrange(min, max);
 	}
 	let l = r * res
 	let str = `${formatNegative(l)} ÷ ${formatNegative(r)} =`;
