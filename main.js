@@ -227,6 +227,7 @@ io.on('connection', (socket) => {
     if (Number(answer) === users[userid].question.result) {
         const elapsed = Date.now() - users[userid].sent - users[userid].ping;
         await db.createBenchmark(userid, users[userid].sent, users[userid].question.op, users[userid].question.l, users[userid].question.r, elapsed, users[userid].attempts);
+        socket.emit('correctAnswer');
         users[userid] = nextQuestion(socket, userid, configs[userid]);
     } else {
         console.log(Number(answer))
